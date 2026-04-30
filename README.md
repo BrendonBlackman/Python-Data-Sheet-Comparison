@@ -43,8 +43,8 @@ Output is written to `comparison_output.xlsx` in the current directory.
 ## Roadmap
 
 ### Error Handling & Validation
-- [ ] Graceful handling of missing or invalid file paths
-- [ ] Detect and report unreadable or corrupt Excel files
+- [x] Graceful handling of missing or invalid file paths
+- [x] Detect and report unreadable or corrupt Excel files
 - [ ] Handle password-protected workbooks
 - [ ] Validate that input files contain data (not empty sheets)
 - [ ] Try/except blocks around column profiling to handle unexpected data types
