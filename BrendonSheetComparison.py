@@ -1,14 +1,38 @@
 import sys
+import os
 import pandas as pd
+
+#Check number of arguments
+if len(sys.argv) != 3:
+    print("Usage: python BrendonSheetComparison.py <file_a.xlsx> <file_b.xlsx>")
+    sys.exit(1)
 
 file_a = sys.argv[1]
 file_b = sys.argv[2]
 
-print(f"Reading {file_a}...")
-df_a = pd.read_excel(file_a)
+for path in [file_a,file_b]:
+    #Check files exist
+    if not os.path.exists(path):
+        print(f"Error: File not found: {path}")
+        sys.exit(1)
+    #Check file type is excel
+    if os.path.splitext(path)[1].lower() != ".xlsx":
+        print(f"Error: File is not an .xlsx file: {path}")
+        sys.exit(1)
 
-print(f"Reading {file_b}...")
-df_b = pd.read_excel(file_b)
+try:
+    print(f"Reading {file_a}...")
+    df_a = pd.read_excel(file_a)
+except Exception as e:
+    print(f"Error: Could not read {file_a}: {e}")
+    sys.exit(1)
+
+try:
+    print(f"Reading {file_b}...")
+    df_b = pd.read_excel(file_b)
+except Exception as e:
+    print(f"Error: Could not read {file_b}: {e}")
+    sys.exit(1)
 
 def profile_column(series):
     """Compute stats for a single column."""
