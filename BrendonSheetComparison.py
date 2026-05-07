@@ -31,12 +31,12 @@ def profile_column(series):
     stats["dtype"] = str(series.dtype)
     stats["total_rows"] = len(series)
     stats["null_count"] = int(series.isna().sum())
-    stats["blank_count"] = int((series.astype(str).str.strip() == "").sum()) - stats["null_count"]
+    stats["blank_count"] = int((series.astype(str).str.strip() == "").sum())
     stats["null_pct"] = round(stats["null_count"]/stats["total_rows"] * 100,2) if stats["total_rows"] > 0 else 0
     stats["unique_values"] = int(series.nunique())
 
     #Additional info for numeric datatypes
-    if pd.api.types.is_numeric_dtype(series):
+    if pd.api.types.is_numeric_dtype(series) and series.dropna().empty == False:
         stats["min"] = series.min()
         stats["max"] = series.max()
         stats["mean"] = round(float(series.mean()), 4)
@@ -177,5 +177,28 @@ output_file = "comparison_output.xlsx"
 with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
     summary_df.to_excel(writer, sheet_name="Summary", index=False)
     all_profiles.to_excel(writer, sheet_name="Column Detail", index=False)
+    
+    for sheet_name in writer.book.sheetnames:
+        sheet = writer.book[sheet_name]
+        for column_cells in sheet.columns:
+            max_length = max(len(str(cell.value or "")) for cell in column_cells)
+            column_letter = column_cells[0].column_letter
+            sheet.column_dimensions[column_letter].width = max_length + 2
+
+            # Apply number forats based on column header
+            header = str(column_cells[0].value or "")
+            for cell in column_cells[1:]: # skip header row
+                if cell.value is None:
+                    continue
+                if "pct" in header.lower() or "null %" in header.lower():
+                    cell.number_format = '0.0"%"'
+                elif isinstance(cell.value, float):
+                    if cell.value == int(cell.value):
+                        cell.number_format = '#,##0'
+                    else:
+                        cell.number_format = '#,##0.0'
+                elif isinstance(cell.value, int):
+                    cell.number_format = '#,##0'
+
 
 print(f"\n Done! Output written to: {output_file}")
