@@ -58,8 +58,8 @@ Output is written to `comparison_output.xlsx` in the current directory.
 
 ### Output Polish
 - [ ] Written highlight summary on the Summary sheet (auto-generated text calling out key differences)
-- [ ] Value formatting — percentages to 2dp, large numbers with commas, clean null display
-- [ ] Column width auto-sizing based on content length
+- [x] Value formatting — percentages to 2dp, large numbers with commas, clean null display
+- [x] Column width auto-sizing based on content length
 - [ ] Row height and text wrapping for readability
 - [ ] Conditional formatting — highlight cells where stats diverge significantly between files
 - [ ] Freeze header rows and panes for easier navigation
