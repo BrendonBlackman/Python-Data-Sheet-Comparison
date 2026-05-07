@@ -45,10 +45,10 @@ Output is written to `comparison_output.xlsx` in the current directory.
 ### Error Handling & Validation
 - [x] Graceful handling of missing or invalid file paths
 - [x] Detect and report unreadable or corrupt Excel files
-- [ ] Handle password-protected workbooks
-- [ ] Validate that input files contain data (not empty sheets)
-- [ ] Try/except blocks around column profiling to handle unexpected data types
-- [ ] Meaningful error messages with guidance on how to fix the issue
+- [x] Handle password-protected workbooks
+- [x] Validate that input files contain data (not empty sheets)
+- [x] Try/except blocks around column profiling to handle unexpected data types
+- [x] Meaningful error messages with guidance on how to fix the issue
 
 ### Multi-File Comparison
 - [ ] Accept any number of input files (not just two)

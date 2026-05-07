@@ -2,37 +2,26 @@ import sys
 import os
 import pandas as pd
 
-#Check number of arguments
-if len(sys.argv) != 3:
-    print("Usage: python BrendonSheetComparison.py <file_a.xlsx> <file_b.xlsx>")
-    sys.exit(1)
-
-file_a = sys.argv[1]
-file_b = sys.argv[2]
-
-for path in [file_a,file_b]:
-    #Check files exist
-    if not os.path.exists(path):
-        print(f"Error: File not found: {path}")
+def read_excel_file(path):
+    """Test Excel file for password protection and empty data"""
+    password_indicators = ["encrypt","password","not a zip file","xlrd"]
+    try:
+        print(f"Reading {path}...")
+        df = pd.read_excel(path)
+    except Exception as e:
+        error_msg = str(e).lower()
+        if any(keyword in error_msg for keyword in password_indicators):
+            print(f"Error: '{path}' appears to be password-protected or encrypted.")
+            print("  Fix: Remove the password in Excel (File > Info > Protect Workbook > Encrypt with Password) and save again.")
+        else:
+            print(f"Error: Could not read '{path}': {e}")
+            print(f"  Fix: Ensure the file is a valid .xlsx workbook and is not corrupt.")
         sys.exit(1)
-    #Check file type is excel
-    if os.path.splitext(path)[1].lower() != ".xlsx":
-        print(f"Error: File is not an .xlsx file: {path}")
+    if df.empty:
+        print(f"Error: '{path}' contains no data (0 rows).")
+        print("  Fix: Ensure the file has a header and at least one row of data underneath.")
         sys.exit(1)
-
-try:
-    print(f"Reading {file_a}...")
-    df_a = pd.read_excel(file_a)
-except Exception as e:
-    print(f"Error: Could not read {file_a}: {e}")
-    sys.exit(1)
-
-try:
-    print(f"Reading {file_b}...")
-    df_b = pd.read_excel(file_b)
-except Exception as e:
-    print(f"Error: Could not read {file_b}: {e}")
-    sys.exit(1)
+    return df
 
 def profile_column(series):
     """Compute stats for a single column."""
@@ -87,7 +76,12 @@ def profile_dataframe(df, label):
     """Profiling each column."""
     results = []
     for col in df.columns:
-        stats = profile_column(df[col])
+        try:
+            stats = profile_column(df[col])
+        except Exception as e:
+            print(f"Warning: Could not profile column '{col}' in {label}: {e}")
+            print("  The column will appear with limited stats in the output.")
+            stats = {"dtype": str(df[col].dtype), "total_rows": len(df[col])}
         stats["source"] = label
         stats["column_name"] = col
         results.append(stats)
@@ -134,6 +128,31 @@ def build_summary(df_a, df_b, file_a, file_b):
         ],
     }
     return pd.DataFrame(summary_data)
+
+#Check number of arguments
+if len(sys.argv) != 3:
+    print("Usage: python BrendonSheetComparison.py <file_a.xlsx> <file_b.xlsx>")
+    sys.exit(1)
+
+file_a = sys.argv[1]
+file_b = sys.argv[2]
+
+for path in [file_a,file_b]:
+    #Check files exist
+    if not os.path.exists(path):
+        print(f"Error: File not found: {path}")
+        print("  Fix: Check the file path and spelling.")
+        sys.exit(1)
+    #Check file type is excel
+    if os.path.splitext(path)[1].lower() != ".xlsx":
+        print(f"Error: File is not an .xlsx file: {path}")
+        print("  Fix: Convert the file to .xlsx format or rename if it's already Excel.")
+        sys.exit(1)
+      
+df_a = read_excel_file(file_a)
+df_b = read_excel_file(file_b)
+
+
 
 print("Profiling File A...")
 profile_a = profile_dataframe(df_a, "File_A")
